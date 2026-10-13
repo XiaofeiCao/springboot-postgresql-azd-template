@@ -6,7 +6,7 @@ A deliberately prepared Java 21/Maven Notes API, hand-authored `azure.yaml`, Bic
 
 **Azure status (2026-10-13):** a live West US trial provisioned the declared infrastructure, verified developer Entra access to PostgreSQL, and completed database principal/schema/grant bootstrap. The trial identified and corrected the Azure CLI tenant/subscription argument conflict, missing Docker client CA trust, and Windows newline handling for token transport. Deployed application managed-identity CRUD, local application developer-authenticated CRUD, repeat deployment, and cloud cleanup are still being verified. Infrastructure creation and a successful database connection are not complete end-to-end application acceptance.
 
-**Prototype dependency:** this repository contains the template, not the `azure.springboot` extension source or binary. Install the separately supplied extension **0.0.1** before initialization. It is not available from the public extension registry; cloning this repository alone does not provide `azd springboot` commands.
+**Prototype dependency:** this repository contains the template, not the `azure.springboot` extension source or binary. Build and install extension **0.0.1** from the [prototype fork branch](https://github.com/XiaofeiCao/azure-dev/tree/xiaofeicao-spring-boot-mvp/cli/azd/extensions/azure.springboot) before initialization. It is not available from the public extension registry; cloning this template repository alone does not provide `azd springboot` commands.
 
 ## Prerequisites
 
@@ -25,7 +25,15 @@ Generated `.local/` certificate bundles are excluded by both `.gitignore` and `.
 
 ## Local extension build/install and fresh initialization
 
-The extension source is supplied separately at `cli\azd\extensions\azure.springboot` in the prototype azd worktree; it is not included in this repository or guaranteed to exist in an upstream azd checkout. The template's build/install helper creates a file-based local registry; it does **not** publish an extension.
+The extension source is at `cli\azd\extensions\azure.springboot` on branch `xiaofeicao-spring-boot-mvp` of [XiaofeiCao/azure-dev](https://github.com/XiaofeiCao/azure-dev/tree/xiaofeicao-spring-boot-mvp). It is not included in this template repository or guaranteed to exist in an upstream azd checkout. The template's build/install helper creates a file-based local registry; it does **not** publish an extension.
+
+Fetch just the prototype source:
+
+```powershell
+git clone --filter=blob:none --sparse --single-branch --branch xiaofeicao-spring-boot-mvp `
+    https://github.com/XiaofeiCao/azure-dev.git springboot-extension-source
+git -C springboot-extension-source sparse-checkout set cli/azd/extensions/azure.springboot
+```
 
 PowerShell example (replace the paths):
 
