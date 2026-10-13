@@ -139,6 +139,24 @@ azd deploy --all    # Automatically packages through the extension before deploy
 azd up             # Same sequential behavior on repeat; uses the previously published app image during provision.
 ```
 
+### Known provisioning repeatability limitation
+
+A live trial completed `azd up`, a separate `azd deploy --all`, and reads/writes
+from both the deployed managed identity and the local developer application.
+However, a subsequent `azd up` and one unchanged-scope retry failed during
+PostgreSQL Entra administrator reconciliation with
+`AadAuthOperationCannotBePerformedWhenServerIsNotAccessible`. The server reported
+Ready and the existing administrator was correct; the failure followed the
+server update and occurred before packaging/deployment.
+
+Repeated provisioning is therefore not reliably verified for this prototype.
+For application-only changes after successful provisioning, use
+`azd deploy --all`, which does not reconcile the PostgreSQL server. If the
+administrator reconciliation error occurs, stop and inspect the failed Azure
+operation rather than repeatedly provisioning, broadening firewall rules, or
+changing authentication. Review and clean up trial-owned resources even when
+provisioning fails.
+
 Initial provision uses `mcr.microsoft.com/azuredocs/containerapps-helloworld:latest` (port 80, no API probes) only as a bootstrap placeholder. The supported **controlled-revision** files `infra/api.bicep` and `infra/api.parameters.json` are deployed by azd's Container Apps target. They consume `SERVICE_API_IMAGE_NAME`, switch ingress to port 8080, apply the extension's managed-identity Spring settings, and install the API's startup/liveness/database-backed readiness probes. Merely changing the placeholder's image would leave its port wrong; these revision files must not be removed.
 
 ### Runtime/output contract
