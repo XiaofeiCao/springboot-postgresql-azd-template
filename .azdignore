@@ -1,0 +1,13 @@
+.azure/
+.local/
+.tools/
+.springboot/
+.springboot-azd-config/
+.azure-cli-config/
+.env
+.env.*
+api/target/
+*.log
+infra/main.json
+infra/resources.json
+infra/api.json

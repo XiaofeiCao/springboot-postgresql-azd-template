@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:5432/${POSTGRES_DATABASE:notes}
+    username: ${POSTGRES_USERNAME}
+    password: ""
+    hikari:
+      data-source-properties:
+        currentSchema: ${POSTGRES_SCHEMA:notes}
+        sslmode: verify-full
+        sslrootcert: ${POSTGRES_SSL_ROOT_CERT}
+        authenticationPluginClassName: com.azure.identity.extensions.jdbc.postgresql.AzurePostgresqlAuthenticationPlugin
+        "[azure.managedIdentityEnabled]": ${POSTGRES_MANAGED_IDENTITY_ENABLED:false}
+        "[azure.clientId]": ${AZURE_CLIENT_ID:}
+        "[azure.tenantId]": ${AZURE_TENANT_ID:}

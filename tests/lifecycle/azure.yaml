@@ -1,0 +1,26 @@
+name: springboot-lifecycle-proof
+requiredVersions:
+  azd: "=1.35.1"
+services:
+  api:
+    language: java
+    host: containerapp
+    image: ${SPRINGBOOT_IMAGE}
+    docker:
+      imagePassthrough: true
+    hooks:
+      prepackage:
+        shell: pwsh
+        run: |
+          & ./assert-refresh.ps1 -Stage service-prepackage
+hooks:
+  prepackage:
+    - shell: pwsh
+      run: set-image.ps1
+    - shell: pwsh
+      run: |
+        & ./assert-refresh.ps1 -Stage second-project-prepackage
+  postpackage:
+    shell: pwsh
+    run: |
+      & ./assert-refresh.ps1 -Stage project-postpackage

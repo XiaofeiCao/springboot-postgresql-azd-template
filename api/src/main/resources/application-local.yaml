@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DATABASE:notes}
+    username: ${POSTGRES_USERNAME:notes}
+    password: ${POSTGRES_PASSWORD}
+    hikari:
+      data-source-properties:
+        sslmode: disable

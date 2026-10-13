@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "applicationImage": { "value": "${SERVICE_API_IMAGE_NAME}" },
+    "postgresHost": { "value": "${POSTGRES_HOST}" },
+    "springDatasourceUrl": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_DATASOURCE_URL}" },
+    "springDatasourceUsername": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_DATASOURCE_USERNAME}" },
+    "springProfile": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_PROFILES_ACTIVE}" }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "postgresAdminObjectId": { "value": "${POSTGRES_ADMIN_OBJECT_ID}" },
+    "postgresAdminUsername": { "value": "${POSTGRES_ADMIN_USERNAME}" },
+    "developerIpv4": { "value": "${DEVELOPER_IPV4}" },
+    "developerIpv4Secondary": { "value": "${DEVELOPER_IPV4_SECONDARY=}" },
+    "allowAzureServices": { "value": "${ALLOW_AZURE_SERVICES=false}" },
+    "applicationImage": { "value": "${SPRINGBOOT_IMAGE=mcr.microsoft.com/azuredocs/containerapps-helloworld:latest}" },
+    "springDatasourceUrl": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_DATASOURCE_URL=}" },
+    "springDatasourceUsername": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_DATASOURCE_USERNAME=}" },
+    "springProfile": { "value": "${SPRINGBOOT_DEPLOYED_SPRING_PROFILES_ACTIVE=azure}" }
+  }
+}

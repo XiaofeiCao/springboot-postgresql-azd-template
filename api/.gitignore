@@ -1,0 +1,4 @@
+/target/
+/.verification/
+.env
+*.log
