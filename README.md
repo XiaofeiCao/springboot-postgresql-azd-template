@@ -2,7 +2,8 @@
 
 A prepared Java 21 Spring Boot Notes API deployed to Azure Container Apps, with
 passwordless PostgreSQL persistence. The hand-authored [azure.yaml](azure.yaml)
-keeps `language: java`; template hooks invoke the separate `azure.springboot`
+keeps `language: java`; template hooks invoke the separate
+[azure.springboot](https://github.com/XiaofeiCao/azure-dev/tree/xiaofeicao-spring-boot-mvp/cli/azd/extensions/azure.springboot)
 extension for containerization and configuration. azd owns infrastructure
 provisioning and application deployment.
 
@@ -10,10 +11,15 @@ provisioning and application deployment.
 
 ```mermaid
 flowchart LR
-    Source["api/ Spring Boot source"] -->|"Extension builds with Paketo and pushes"| Registry["Azure Container Registry"]
-    Registry -->|"App identity: AcrPull"| App["Container Apps: Notes API, port 8080"]
+    Source["api/ Spring Boot source"] --> Extension["azure.springboot extension"]
+    Extension -->|"build: Paketo image + push"| Registry["Azure Container Registry"]
+    Extension -->|"Saved Spring settings + image reference"| Deploy["azd deploy: Bicep + image passthrough"]
+    Deploy -->|"Deploy application revision"| App["Container Apps: Notes API, port 8080"]
+    Extension -->|"apply: runtime settings"| App
+    Registry -->|"App identity: AcrPull"| App
     App -->|"Managed identity + TLS"| Database[("PostgreSQL: notes schema")]
-    Local["Local Spring Boot application"] -->|"Developer Entra identity + TLS"| Database
+    Extension -->|"run: local Maven execution"| Local["Local Spring Boot application"]
+    Local -->|"Developer Entra identity + TLS"| Database
     App --> Logs["Log Analytics"]
 ```
 
@@ -40,7 +46,7 @@ Spring Boot application.
 
 The [postprovision hook](scripts/postprovision.ps1) runs database bootstrap to
 create the app's Entra-backed SQL role, `notes` schema, and permissions, then calls
-`azd springboot configure`. The extension maps provisioning outputs into separate
+`azd springboot configure`. The `azure.springboot` extension maps provisioning outputs into separate
 developer and deployed Spring settings in the selected azd environment. Azure
 RBAC alone does not grant SQL permissions.
 
@@ -51,17 +57,17 @@ azd deploy --all
 ```
 
 1. [predeploy](scripts/predeploy.ps1) runs `azd package --all`.
-   [prepackage](scripts/prepackage.ps1) invokes extension `configure` and `build`:
-   Paketo builds `api/`, the extension pushes the image to ACR, and saves
+   [prepackage](scripts/prepackage.ps1) invokes `azd springboot configure`, then
+   `azd springboot build`: the extension builds `api/` with Paketo, pushes to ACR, and saves
    `SPRINGBOOT_IMAGE`.
 2. azd reloads the environment and consumes that image through
    `docker.imagePassthrough: true`, without another build. Its Container Apps
    target deploys [infra/api.bicep](infra/api.bicep), using
    [generated settings](infra/api.parameters.json) to configure the application
    revision, port 8080, identity, and startup/liveness/readiness probes.
-3. [postdeploy](scripts/postdeploy.ps1) invokes extension `apply` to update runtime
+3. [postdeploy](scripts/postdeploy.ps1) invokes `azd springboot apply` to update runtime
    settings, then waits for database-backed readiness. Container Apps runs the
-   application; extension `run` is for local Maven execution, not cloud startup.
+   application; `azd springboot run` is for local Maven execution, not cloud startup.
 
 `azd up` combines these stages in the template's explicit **provision -> deploy**
 workflow. Provisioning comes first because image publication needs the registry.
