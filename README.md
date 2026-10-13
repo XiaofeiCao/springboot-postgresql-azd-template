@@ -10,17 +10,44 @@ provisioning and application deployment.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    Source["api/ Spring Boot source"] --> Extension["azure.springboot extension"]
-    Extension -->|"build: Paketo image + push"| Registry["Azure Container Registry"]
-    Extension -->|"Saved Spring settings + image reference"| Deploy["azd deploy: Bicep + image passthrough"]
-    Deploy -->|"Deploy application revision"| App["Container Apps: Notes API, port 8080"]
-    Extension -->|"apply: runtime settings"| App
+flowchart TB
+    subgraph Template["Template project (files)"]
+        Definition["azure.yaml + hooks + Bicep"]
+        Source["api/ Spring Boot source"]
+    end
+
+    subgraph Machine["Developer machine"]
+        Azd["azd core: azd up"]
+        subgraph Extension["azure.springboot (separate executable)"]
+            Configure["azd springboot configure"]
+            Build["azd springboot build"]
+            Apply["azd springboot apply"]
+            Run["azd springboot run"]
+        end
+        Local["Local Spring Boot application"]
+    end
+
+    subgraph Azure["Azure (runtime resources)"]
+        Registry["Azure Container Registry"]
+        App["Container Apps: Notes API, port 8080"]
+        Database[("PostgreSQL: notes schema")]
+        Logs["Log Analytics"]
+    end
+
+    Definition -->|"Defines workflow"| Azd
+    Azd -->|"Template hooks invoke commands"| Extension
+    Azd -->|"azd provision: Bicep"| Azure
+    Azd -->|"azd deploy --all: image passthrough + Bicep"| App
+    Source -->|"Build context"| Build
+    Configure -->|"SDK/gRPC: Spring settings"| Azd
+    Build -->|"Paketo/Docker build + push"| Registry
+    Build -->|"SDK/gRPC: SPRINGBOOT_IMAGE"| Azd
+    Apply -->|"Azure CLI: update runtime settings"| App
+    Run -->|"Maven + developer configuration"| Local
     Registry -->|"App identity: AcrPull"| App
-    App -->|"Managed identity + TLS"| Database[("PostgreSQL: notes schema")]
-    Extension -->|"run: local Maven execution"| Local["Local Spring Boot application"]
+    App -->|"Managed identity + TLS"| Database
     Local -->|"Developer Entra identity + TLS"| Database
-    App --> Logs["Log Analytics"]
+    App --> Logs
 ```
 
 The API reads and writes notes in PostgreSQL. A user-assigned managed identity
